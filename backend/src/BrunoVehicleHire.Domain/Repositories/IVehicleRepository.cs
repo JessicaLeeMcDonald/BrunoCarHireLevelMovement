@@ -6,6 +6,8 @@ public interface IVehicleRepository
 {
     Task<Vehicle?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
+    Task<Vehicle?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken ct = default);
+
     Task<bool> RegistrationNumberExistsAsync(string registrationNumber, Guid? excludeId = null, CancellationToken ct = default);
 
     Task<(IReadOnlyList<Vehicle> Items, int TotalCount)> GetPagedAsync(

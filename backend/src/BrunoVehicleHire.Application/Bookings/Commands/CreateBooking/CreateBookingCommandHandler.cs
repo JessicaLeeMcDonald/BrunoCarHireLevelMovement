@@ -21,7 +21,7 @@ public sealed class CreateBookingCommandHandler : IRequestHandler<CreateBookingC
 
     public async Task<BookingDto> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
     {
-        var vehicle = await _unitOfWork.Vehicles.GetByIdAsync(request.VehicleId, cancellationToken)
+        var vehicle = await _unitOfWork.Vehicles.GetByIdIncludingDeletedAsync(request.VehicleId, cancellationToken)
             ?? throw new NotFoundException(nameof(Vehicle), request.VehicleId);
 
         if (vehicle.IsDeleted)

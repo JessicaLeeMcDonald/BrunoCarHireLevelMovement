@@ -25,9 +25,7 @@ public sealed class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.HasOne<Vehicle>().WithMany().HasForeignKey(b => b.VehicleId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Customer>().WithMany().HasForeignKey(b => b.CustomerId).OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasIndex(b => new { b.VehicleId, b.Period.Start, b.Period.End })
-            .HasDatabaseName("IX_Bookings_VehicleId_StartDate_EndDate");
-
+        builder.HasIndex(b => new { b.VehicleId, b.Status }).HasDatabaseName("IX_Bookings_VehicleId_Status");
         builder.HasIndex(b => b.CustomerId).HasDatabaseName("IX_Bookings_CustomerId");
     }
 }

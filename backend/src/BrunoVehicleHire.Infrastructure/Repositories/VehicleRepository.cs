@@ -18,6 +18,9 @@ public sealed class VehicleRepository : IVehicleRepository
     public Task<Vehicle?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         _context.Vehicles.FirstOrDefaultAsync(v => v.Id == id, ct);
 
+    public Task<Vehicle?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken ct = default) =>
+        _context.Vehicles.IgnoreQueryFilters().FirstOrDefaultAsync(v => v.Id == id, ct);
+
     public async Task<bool> RegistrationNumberExistsAsync(string registrationNumber, Guid? excludeId = null, CancellationToken ct = default)
     {
         var query = _context.Vehicles.IgnoreQueryFilters().Where(v => v.RegistrationNumber == registrationNumber);
