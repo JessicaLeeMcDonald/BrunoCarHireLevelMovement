@@ -35,9 +35,10 @@ public sealed class VehiclesController : ControllerBase
         [FromQuery] string? make = null,
         [FromQuery] string? model = null,
         [FromQuery] bool? availableOnly = null,
+        [FromQuery] bool includeDeleted = false,
         CancellationToken ct = default)
     {
-        var result = await _sender.Send(new GetVehiclesListQuery(pageNumber, pageSize, make, model, availableOnly), ct);
+        var result = await _sender.Send(new GetVehiclesListQuery(pageNumber, pageSize, make, model, availableOnly, includeDeleted), ct);
         return Ok(result);
     }
 

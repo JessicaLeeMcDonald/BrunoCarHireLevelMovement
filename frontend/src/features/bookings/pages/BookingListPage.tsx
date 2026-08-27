@@ -41,7 +41,7 @@ export function BookingListPage() {
     customerId: filters.customerId || undefined,
   });
 
-  const { data: vehiclesData } = useVehicles({ pageNumber: 1, pageSize: 100 });
+  const { data: vehiclesData } = useVehicles({ pageNumber: 1, pageSize: 100, includeDeleted: true });
   const { data: customersData } = useCustomers({ pageNumber: 1, pageSize: 100 });
 
   const vehicleById = useMemo(() => new Map(vehiclesData?.items.map((v) => [v.id, v])), [vehiclesData]);

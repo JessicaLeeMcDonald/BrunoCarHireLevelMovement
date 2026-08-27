@@ -9,4 +9,5 @@ public sealed record GetVehiclesListQuery(
     int PageSize,
     string? Make,
     string? Model,
-    bool? AvailableOnly) : IRequest<PagedResult<VehicleDto>>;
+    bool? AvailableOnly,
+    bool IncludeDeleted = false) : IRequest<PagedResult<VehicleDto>>;

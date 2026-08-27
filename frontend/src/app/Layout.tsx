@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom';
+import { PonyBadge } from '../shared/components/PonyBadge';
 
 const NAV_LINKS = [
   { to: '/vehicles', label: 'Vehicles' },
@@ -11,7 +12,10 @@ export function Layout() {
     <div className="app-shell">
       <header className="app-header">
         <div className="app-header-inner">
-          <span className="app-brand">Bruno Vehicle Hire</span>
+          <span className="app-brand">
+            <PonyBadge />
+            Bruno Vehicle Hire
+          </span>
           <nav className="app-nav">
             {NAV_LINKS.map((link) => (
               <NavLink

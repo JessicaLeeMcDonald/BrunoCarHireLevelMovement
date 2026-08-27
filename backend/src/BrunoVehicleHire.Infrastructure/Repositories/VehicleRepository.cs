@@ -32,9 +32,9 @@ public sealed class VehicleRepository : IVehicleRepository
     }
 
     public async Task<(IReadOnlyList<Vehicle> Items, int TotalCount)> GetPagedAsync(
-        int pageNumber, int pageSize, string? make, string? model, bool? availableOnly, CancellationToken ct = default)
+        int pageNumber, int pageSize, string? make, string? model, bool? availableOnly, bool includeDeleted = false, CancellationToken ct = default)
     {
-        var query = _context.Vehicles.AsQueryable();
+        var query = includeDeleted ? _context.Vehicles.IgnoreQueryFilters().AsQueryable() : _context.Vehicles.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(make))
             query = query.Where(v => v.Make.Contains(make));

@@ -19,7 +19,7 @@ public sealed class GetVehiclesListQueryHandler : IRequestHandler<GetVehiclesLis
         var (pageNumber, pageSize) = Pagination.Normalize(request.PageNumber, request.PageSize);
 
         var (items, totalCount) = await _unitOfWork.Vehicles.GetPagedAsync(
-            pageNumber, pageSize, request.Make, request.Model, request.AvailableOnly, cancellationToken);
+            pageNumber, pageSize, request.Make, request.Model, request.AvailableOnly, request.IncludeDeleted, cancellationToken);
 
         return new PagedResult<VehicleDto>(items.Select(v => v.ToDto()).ToList(), pageNumber, pageSize, totalCount);
     }
