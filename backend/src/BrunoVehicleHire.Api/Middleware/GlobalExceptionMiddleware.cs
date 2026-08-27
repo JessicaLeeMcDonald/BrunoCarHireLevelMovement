@@ -39,6 +39,7 @@ public sealed class GlobalExceptionMiddleware
             VehicleUnavailableException unavailableEx => BuildProblem(HttpStatusCode.Conflict, "Vehicle Unavailable", unavailableEx.Message, "vehicleId"),
             CustomerHasBookingsException hasBookingsEx => BuildProblem(HttpStatusCode.Conflict, "Customer Has Bookings", hasBookingsEx.Message),
             PastBookingDeletionException pastBookingEx => BuildProblem(HttpStatusCode.BadRequest, "Invalid Operation", pastBookingEx.Message),
+            InvalidBookingStatusTransitionException invalidTransitionEx => BuildProblem(HttpStatusCode.BadRequest, "Invalid Operation", invalidTransitionEx.Message),
             InvalidDateRangeException invalidRangeEx => BuildProblem(HttpStatusCode.BadRequest, "Invalid Date Range", invalidRangeEx.Message, "endDate"),
             DuplicateEntityException duplicateEx => BuildProblem(HttpStatusCode.Conflict, "Duplicate Entity", duplicateEx.Message),
             DomainException domainEx => BuildProblem(HttpStatusCode.BadRequest, "Business Rule Violation", domainEx.Message),

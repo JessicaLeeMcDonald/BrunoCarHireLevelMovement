@@ -48,7 +48,7 @@ public sealed class Booking : BaseEntity
     public void Cancel()
     {
         if (Status != BookingStatus.Active)
-            throw new InvalidOperationException($"Cannot cancel a booking with status '{Status}'.");
+            throw new InvalidBookingStatusTransitionException($"Cannot cancel a booking with status '{Status}'.");
 
         Status = BookingStatus.Cancelled;
     }
@@ -56,7 +56,7 @@ public sealed class Booking : BaseEntity
     public void Complete()
     {
         if (Status != BookingStatus.Active)
-            throw new InvalidOperationException($"Cannot complete a booking with status '{Status}'.");
+            throw new InvalidBookingStatusTransitionException($"Cannot complete a booking with status '{Status}'.");
 
         Status = BookingStatus.Completed;
     }

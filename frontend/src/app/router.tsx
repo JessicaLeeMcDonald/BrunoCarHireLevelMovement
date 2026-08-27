@@ -4,6 +4,8 @@ import { VehicleListPage } from '../features/vehicles/pages/VehicleListPage';
 import { VehicleFormPage } from '../features/vehicles/pages/VehicleFormPage';
 import { CustomerListPage } from '../features/customers/pages/CustomerListPage';
 import { CustomerFormPage } from '../features/customers/pages/CustomerFormPage';
+import { BookingListPage } from '../features/bookings/pages/BookingListPage';
+import { BookingFormPage } from '../features/bookings/pages/BookingFormPage';
 
 export const router = createBrowserRouter([
   {
@@ -17,6 +19,8 @@ export const router = createBrowserRouter([
       { path: 'customers', element: <CustomerListPage /> },
       { path: 'customers/new', element: <CustomerFormPage /> },
       { path: 'customers/:id/edit', element: <CustomerFormPage /> },
+      { path: 'bookings', element: <BookingListPage /> },
+      { path: 'bookings/new', element: <BookingFormPage /> },
     ],
   },
 ]);
