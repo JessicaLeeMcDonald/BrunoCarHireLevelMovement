@@ -1,6 +1,7 @@
 using BrunoVehicleHire.Application.Common.Models;
 using BrunoVehicleHire.Application.Customers.Commands.CreateCustomer;
 using BrunoVehicleHire.Application.Customers.Commands.DeleteCustomer;
+using BrunoVehicleHire.Application.Customers.Commands.UpdateCustomer;
 using BrunoVehicleHire.Application.Customers.Dtos;
 using BrunoVehicleHire.Application.Customers.Queries.GetCustomerById;
 using BrunoVehicleHire.Application.Customers.Queries.GetCustomersList;
@@ -57,6 +58,16 @@ public sealed class CustomersController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
+    /// <summary>Update an existing customer's contact details.</summary>
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<CustomerDto>> Update(Guid id, [FromBody] UpdateCustomerRequest request, CancellationToken ct)
+    {
+        var result = await _sender.Send(new UpdateCustomerCommand(id, request.FirstName, request.LastName, request.PhoneNumber), ct);
+        return Ok(result);
+    }
+
     /// <summary>Delete a customer. Fails if the customer has any bookings.</summary>
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -68,3 +79,6 @@ public sealed class CustomersController : ControllerBase
         return NoContent();
     }
 }
+
+/// <summary>Request body for updating a customer's mutable contact details.</summary>
+public sealed record UpdateCustomerRequest(string FirstName, string LastName, string PhoneNumber);
