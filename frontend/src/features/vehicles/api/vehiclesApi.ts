@@ -9,6 +9,8 @@ export interface VehicleListParams {
   model?: string;
   availableOnly?: boolean;
   includeDeleted?: boolean;
+  availableFrom?: string;
+  availableTo?: string;
 }
 
 export interface CreateVehicleInput {

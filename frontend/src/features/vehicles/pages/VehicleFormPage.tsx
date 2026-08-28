@@ -8,6 +8,7 @@ import type { ApiError } from '../../../shared/api/apiError';
 import { useToast } from '../../../shared/components/Toast/useToast';
 import type { VehicleFormValues } from '../schemas/vehicleSchema';
 import { Skeleton } from '../../../shared/components/Skeleton';
+import { Breadcrumb } from '../../../shared/components/Breadcrumb';
 
 export function VehicleFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -51,6 +52,7 @@ export function VehicleFormPage() {
 
   return (
     <div className="page">
+      <Breadcrumb items={[{ label: 'Vehicles', to: '/vehicles' }, { label: isEdit ? 'Edit vehicle' : 'Add vehicle' }]} />
       <h1>{isEdit ? 'Edit vehicle' : 'Add vehicle'}</h1>
       <VehicleForm
         mode={isEdit ? 'edit' : 'create'}

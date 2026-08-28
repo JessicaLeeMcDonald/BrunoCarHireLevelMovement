@@ -8,6 +8,7 @@ import type { ApiError } from '../../../shared/api/apiError';
 import { useToast } from '../../../shared/components/Toast/useToast';
 import type { CustomerFormValues } from '../schemas/customerSchema';
 import { Skeleton } from '../../../shared/components/Skeleton';
+import { Breadcrumb } from '../../../shared/components/Breadcrumb';
 
 export function CustomerFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -55,6 +56,7 @@ export function CustomerFormPage() {
 
   return (
     <div className="page">
+      <Breadcrumb items={[{ label: 'Customers', to: '/customers' }, { label: isEdit ? 'Edit customer' : 'Add customer' }]} />
       <h1>{isEdit ? 'Edit customer' : 'Add customer'}</h1>
       <CustomerForm
         mode={isEdit ? 'edit' : 'create'}

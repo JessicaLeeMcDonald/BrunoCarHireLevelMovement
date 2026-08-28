@@ -2,9 +2,10 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { PonyBadge } from '../shared/components/PonyBadge';
 
 const NAV_LINKS = [
-  { to: '/vehicles', label: 'Vehicles' },
-  { to: '/customers', label: 'Customers' },
-  { to: '/bookings', label: 'Bookings' },
+  { to: '/', label: 'Home', end: true },
+  { to: '/vehicles', label: 'Vehicles', end: false },
+  { to: '/customers', label: 'Customers', end: false },
+  { to: '/bookings', label: 'Bookings', end: false },
 ];
 
 export function Layout() {
@@ -21,6 +22,7 @@ export function Layout() {
               <NavLink
                 key={link.to}
                 to={link.to}
+                end={link.end}
                 className={({ isActive }) => `app-nav-link${isActive ? ' app-nav-link-active' : ''}`}
               >
                 {link.label}

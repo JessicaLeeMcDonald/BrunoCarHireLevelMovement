@@ -28,7 +28,7 @@ public class GetVehiclesListQueryHandlerTests
         };
 
         _vehicleRepository
-            .Setup(r => r.GetPagedAsync(1, 20, null, null, null, false, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetPagedAsync(1, 20, null, null, null, false, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync((vehicles, vehicles.Count));
 
         var result = await _handler.Handle(new GetVehiclesListQuery(1, 20, null, null, null), CancellationToken.None);
@@ -42,7 +42,7 @@ public class GetVehiclesListQueryHandlerTests
     public async Task Handle_NormalizesOutOfRangePagination()
     {
         _vehicleRepository
-            .Setup(r => r.GetPagedAsync(1, 20, null, null, null, false, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetPagedAsync(1, 20, null, null, null, false, null, null, It.IsAny<CancellationToken>()))
             .ReturnsAsync((new List<Vehicle>(), 0));
 
         var result = await _handler.Handle(new GetVehiclesListQuery(0, 0, null, null, null), CancellationToken.None);

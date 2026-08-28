@@ -32,7 +32,8 @@ public sealed class VehicleRepository : IVehicleRepository
     }
 
     public async Task<(IReadOnlyList<Vehicle> Items, int TotalCount)> GetPagedAsync(
-        int pageNumber, int pageSize, string? make, string? model, bool? availableOnly, bool includeDeleted = false, CancellationToken ct = default)
+        int pageNumber, int pageSize, string? make, string? model, bool? availableOnly, bool includeDeleted = false,
+        DateTime? availableFrom = null, DateTime? availableTo = null, CancellationToken ct = default)
     {
         var query = includeDeleted ? _context.Vehicles.IgnoreQueryFilters().AsQueryable() : _context.Vehicles.AsQueryable();
 
@@ -49,6 +50,16 @@ public sealed class VehicleRepository : IVehicleRepository
                 b.VehicleId == v.Id &&
                 b.Status == BookingStatus.Active &&
                 b.Period.Start <= now && b.Period.End >= now));
+        }
+
+        if (availableFrom.HasValue && availableTo.HasValue)
+        {
+            var from = availableFrom.Value;
+            var to = availableTo.Value;
+            query = query.Where(v => !_context.Bookings.Any(b =>
+                b.VehicleId == v.Id &&
+                b.Status == BookingStatus.Active &&
+                b.Period.Start < to && from < b.Period.End));
         }
 
         var totalCount = await query.CountAsync(ct);

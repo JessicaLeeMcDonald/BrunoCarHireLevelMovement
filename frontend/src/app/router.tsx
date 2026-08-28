@@ -1,5 +1,6 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import { Layout } from './Layout';
+import { HomePage } from '../features/home/pages/HomePage';
 import { VehicleListPage } from '../features/vehicles/pages/VehicleListPage';
 import { VehicleFormPage } from '../features/vehicles/pages/VehicleFormPage';
 import { CustomerListPage } from '../features/customers/pages/CustomerListPage';
@@ -12,7 +13,7 @@ export const router = createBrowserRouter([
     path: '/',
     element: <Layout />,
     children: [
-      { index: true, element: <Navigate to="/vehicles" replace /> },
+      { index: true, element: <HomePage /> },
       { path: 'vehicles', element: <VehicleListPage /> },
       { path: 'vehicles/new', element: <VehicleFormPage /> },
       { path: 'vehicles/:id/edit', element: <VehicleFormPage /> },

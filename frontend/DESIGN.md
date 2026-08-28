@@ -32,6 +32,24 @@ Two families on a deliberate contrast axis, per the product register's "display 
 
 - **`--font-display` (Alfa Slab One, loaded via Google Fonts in `index.html`)** — used *only* for the brand wordmark and page-title `<h1>`/modal `<h2>` headings. Never on buttons, badges, table data, or form labels.
 - **`--font-sans` (system UI stack)** — everything else: nav, buttons, table, forms, toasts. Keeps data-dense screens legible and avoids the product-register ban on display fonts in UI labels/data.
+- **`--font-script` (Playfair Display italic, loaded via Google Fonts in `index.html`)** — reserved for a single elegant accent moment; not currently in active use on any page, kept as a token for future use rather than removed.
+
+## Home page (built from the user's own wireframes)
+
+Superseded an earlier Figma-inspired hero (ghost year number + spotlight vehicle) once the user shared hand-drawn wireframes of the actual intended screens — those wireframes are the authoritative source now.
+
+- **Tagline hero** (`.home-tagline-block` / `.home-tagline`) — "Pick your ride. Book it in 30 seconds." in `--font-display`, above a real, working quick-book search bar.
+- **Quick-book search** (`.quickbook-bar`) — vehicle/make text filter + pick-up/return date inputs + "Check availability." This is a genuine feature, not a decorative form: it calls `GET /api/vehicles?availableFrom=&availableTo=&make=`, a real date-range availability filter added to the backend (`VehicleRepository.GetPagedAsync`) alongside the pre-existing "available right now" filter — checking a specific future range needed its own query, since "available now" doesn't answer "available next Tuesday."
+- **On the lot today** (`.lot-grid` / `.lot-card`) — up to 3 vehicles with an Available/Out-on-hire badge (from the "available now" filter) and a "Book this one" button that navigates to `/bookings/new?vehicleId=…`, which `BookingFormPage` reads to pre-select the vehicle. Search results reuse the same card component with the badge forced to "Available" (the query already guarantees it for the searched range).
+- **Vehicle photo placeholder** (`.lot-card-image`) — a plain chrome-gradient box, not a fabricated stock photo; this app has no real vehicle photography yet.
+- **Staff shortcuts** (`.home-shortcuts`) — a dashed-border box with quick links to Bookings/Customers, matching the wireframe's staff-shortcuts panel.
+- **Checker divider** (`.home-checker-divider`) — reuses the existing `--checker-strip` token as a section break.
+
+No pagination dots or carousel chevrons were carried over from any reference — there's nothing real to paginate without fabricating fake state, and PRODUCT.md's own principle is that motifs decorate real structure, not stand in for it.
+
+## Breadcrumbs
+
+`shared/components/Breadcrumb.tsx` — added to all three create/edit form pages (Vehicles, Customers, Bookings) after the wireframes showed one on the New Booking screen; extended to all three for consistent affordances across the surface (product-register principle: same component vocabulary everywhere, not just where a reference happened to show it).
 
 ## Motifs
 

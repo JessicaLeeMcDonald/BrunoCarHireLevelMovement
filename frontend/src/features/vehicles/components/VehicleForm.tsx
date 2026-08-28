@@ -51,7 +51,12 @@ export function VehicleForm({ mode, initialValues, onSubmit, isSubmitting, serve
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="form" noValidate>
-      <FormField label="Registration number" htmlFor="registrationNumber" error={errors.registrationNumber}>
+      <FormField
+        label="Registration number"
+        htmlFor="registrationNumber"
+        error={errors.registrationNumber}
+        hint={mode === 'edit' ? 'Registration number cannot be changed.' : undefined}
+      >
         <input id="registrationNumber" {...register('registrationNumber')} disabled={mode === 'edit'} />
       </FormField>
       <FormField label="Make" htmlFor="make" error={errors.make}>

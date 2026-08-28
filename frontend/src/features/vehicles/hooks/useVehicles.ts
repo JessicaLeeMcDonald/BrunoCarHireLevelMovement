@@ -6,12 +6,13 @@ import { toVehicleModel } from '../types/model';
 import type { PagedResult } from '../../../shared/api/types';
 import type { Vehicle } from '../types/model';
 
-export function useVehicles(filters: VehicleListParams) {
+export function useVehicles(filters: VehicleListParams, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: vehicleKeys.list(filters),
     queryFn: () => vehiclesApi.getVehicles(filters),
     select: (data): PagedResult<Vehicle> => ({ ...data, items: data.items.map(toVehicleModel) }),
     placeholderData: keepPreviousData,
+    enabled: options?.enabled,
   });
 }
 

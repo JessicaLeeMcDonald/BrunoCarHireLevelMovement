@@ -15,13 +15,22 @@ import { toIsoDate } from '../../../shared/utils/date';
 interface BookingFormProps {
   vehicles: Vehicle[];
   customers: Customer[];
+  initialVehicleId?: string;
   onSubmit: (values: BookingFormValues) => void;
   isSubmitting: boolean;
   serverError?: ApiError | null;
   onCancel: () => void;
 }
 
-export function BookingForm({ vehicles, customers, onSubmit, isSubmitting, serverError, onCancel }: BookingFormProps) {
+export function BookingForm({
+  vehicles,
+  customers,
+  initialVehicleId,
+  onSubmit,
+  isSubmitting,
+  serverError,
+  onCancel,
+}: BookingFormProps) {
   const {
     register,
     handleSubmit,
@@ -31,7 +40,7 @@ export function BookingForm({ vehicles, customers, onSubmit, isSubmitting, serve
     formState: { errors },
   } = useForm<BookingFormValues>({
     resolver: zodResolver(bookingFormSchema),
-    defaultValues: { vehicleId: '', customerId: '', startDate: '', endDate: '' },
+    defaultValues: { vehicleId: initialVehicleId ?? '', customerId: '', startDate: '', endDate: '' },
   });
 
   useEffect(() => {
@@ -48,9 +57,6 @@ export function BookingForm({ vehicles, customers, onSubmit, isSubmitting, serve
   const startDate = watch('startDate');
   const endDate = watch('endDate');
   const today = toIsoDate(new Date());
-
-  const hasUnmappedServerError =
-    Boolean(serverError) && !serverError?.fieldErrors.vehicleId && !serverError?.fieldErrors.endDate;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="form" noValidate>
@@ -83,7 +89,8 @@ export function BookingForm({ vehicles, customers, onSubmit, isSubmitting, serve
         startError={errors.startDate?.message}
         endError={errors.endDate?.message}
       />
-      {hasUnmappedServerError && <p className="form-error-banner">{serverError?.firstMessage}</p>}
+      {/* Booking conflicts double-signal deliberately: field error above, banner here. */}
+      {serverError && <p className="form-error-banner">{serverError.firstMessage}</p>}
       <div className="form-actions">
         <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={isSubmitting}>
           Cancel
