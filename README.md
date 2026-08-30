@@ -132,3 +132,13 @@ The frontend has no dedicated unit test suite (only the backend tests were requi
 ## Seed data
 
 On first run, `DbSeeder` inserts 3 vehicles, 2 customers, and 2 bookings (one upcoming/active, one past/completed) so the app and Swagger examples have data to work with immediately. Seeding is idempotent (skipped if any vehicle already exists).
+
+## Assumptions
+
+- **Single internal-tool tenant.** One shared API key for the whole app — no per-user login, roles, or permissions. This is a staff-facing counter tool, not a customer-facing multi-tenant product.
+- **Bookings are date-only, not date-time.** Overlap and availability checks compare calendar days; there's no same-day multiple-shift/hourly granularity.
+- **Bookings aren't edited after creation.** Only cancel/complete/delete are supported, matching how a real rental desk works — to change dates or the vehicle, cancel and create a new booking rather than amend one in place.
+- **`TotalPrice` is snapshotted at booking creation** (`dailyRate × days` at that moment) and never recalculated — a later change to a vehicle's daily rate doesn't retroactively change existing bookings' totals.
+- **A booking can outlive the vehicle it references.** Soft-deleting a vehicle removes it from listings and future bookability, but past/existing bookings still display it correctly.
+- **Vehicle photos are optional**, and seed data ships original illustrative artwork rather than real vehicle photography, to avoid any real-world trademark/likeness concerns in a demo dataset.
+- **Local secrets are dev-only convenience values** (via `dotnet user-secrets`), not a production secrets-management strategy (e.g., Key Vault) — out of scope for this assessment.

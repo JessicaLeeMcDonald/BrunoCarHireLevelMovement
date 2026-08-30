@@ -5,9 +5,11 @@ using BrunoVehicleHire.Application.Customers.Commands.UpdateCustomer;
 using BrunoVehicleHire.Application.Customers.Dtos;
 using BrunoVehicleHire.Application.Customers.Queries.GetCustomerById;
 using BrunoVehicleHire.Application.Customers.Queries.GetCustomersList;
+using BrunoVehicleHire.Api.Examples;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
 
 namespace BrunoVehicleHire.Api.Controllers;
 
@@ -52,6 +54,7 @@ public sealed class CustomersController : ControllerBase
     [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [SwaggerRequestExample(typeof(CreateCustomerCommand), typeof(CreateCustomerCommandExample))]
     public async Task<ActionResult<CustomerDto>> Create([FromBody] CreateCustomerCommand command, CancellationToken ct)
     {
         var result = await _sender.Send(command, ct);
