@@ -83,24 +83,35 @@ frontend/src/
 docker compose up -d
 ```
 
-This starts `mcr.microsoft.com/mssql/server:2022-latest` on port 1433. The dev connection string/password are already wired up in `backend/src/BrunoVehicleHire.Api/appsettings.Development.json` so the project runs out of the box.
+This starts `mcr.microsoft.com/mssql/server:2022-latest` on port 1433.
 
-### 2. Run the backend API
+### 2. Configure local secrets (one-time per machine)
+
+The connection string and API key are never committed — they're stored via `dotnet user-secrets`, outside the repo:
+
+```bash
+cd backend/src/BrunoVehicleHire.Api
+dotnet user-secrets set "ConnectionStrings:Default" "Server=localhost,1433;Database=BrunoVehicleHire;User Id=sa;Password=BrunoDev!2026;TrustServerCertificate=True"
+dotnet user-secrets set "ApiKey:Value" "bruno-dev-local-key-2026"
+```
+
+(The password above matches the SQL Server container started in step 1. You can pick your own API key value instead — just use the same one in step 4.)
+
+### 3. Run the backend API
 
 ```bash
 cd backend
 dotnet run --project src/BrunoVehicleHire.Api
 ```
 
-On startup in the `Development` environment, the app automatically applies EF Core migrations and seeds a few vehicles, customers, and bookings if the database is empty (`DbSeeder`) — no manual migration step needed. The API listens on `http://localhost:5080`; Swagger UI is at `http://localhost:5080/swagger` (use the "Authorize" button with the dev API key below to try authenticated requests).
+On startup in the `Development` environment, the app automatically applies EF Core migrations and seeds a few vehicles, customers, and bookings if the database is empty (`DbSeeder`) — no manual migration step needed. The API listens on `http://localhost:5080`; Swagger UI is at `http://localhost:5080/swagger` (use the "Authorize" button with the API key from step 2 to try authenticated requests).
 
-Dev API key: `bruno-dev-local-key-2026` (header `X-Api-Key`).
-
-### 3. Run the frontend
+### 4. Run the frontend
 
 ```bash
 cd frontend
-cp .env.example .env.local   # already points at the dev API + dev key
+cp .env.example .env.local
+# edit .env.local: set VITE_API_KEY to the same value you used in step 2
 npm install
 npm run dev
 ```
