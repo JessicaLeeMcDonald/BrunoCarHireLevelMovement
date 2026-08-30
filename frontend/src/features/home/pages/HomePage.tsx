@@ -6,6 +6,8 @@ import { formatCurrency } from '../../../shared/utils/currency';
 import { Skeleton } from '../../../shared/components/Skeleton';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { toIsoDate } from '../../../shared/utils/date';
+import { toAbsoluteMediaUrl } from '../../../shared/utils/media';
+import { DatePicker } from '../../../shared/components/DatePicker';
 import type { Vehicle } from '../../vehicles/types/model';
 
 interface CommittedSearch {
@@ -39,6 +41,15 @@ export function HomePage() {
 
   const availableNowIds = new Set(availableNowData?.items.map((vehicle) => vehicle.id) ?? []);
 
+  const fleetCount = lotData?.totalCount ?? 0;
+  const availableCount = availableNowData?.totalCount ?? availableNowData?.items.length ?? 0;
+  const bannerItems = [
+    fleetCount > 0 ? `${fleetCount} vehicle${fleetCount === 1 ? '' : 's'} in the Bruno fleet` : 'Fresh wheels, fair prices',
+    `${availableCount} available to book right now`,
+    'Same-day bookings, no hidden fees',
+    'Free tank of gas at pick-up',
+  ];
+
   function handleCheckAvailability(event: FormEvent) {
     event.preventDefault();
     if (!pickupInput || !returnInput) return;
@@ -48,8 +59,12 @@ export function HomePage() {
   function renderLotCard(vehicle: Vehicle, isAvailable: boolean) {
     return (
       <div key={vehicle.id} className="lot-card">
-        <div className="lot-card-image" aria-hidden="true">
-          vehicle photo
+        <div className="lot-card-image">
+          {vehicle.imageUrl ? (
+            <img src={toAbsoluteMediaUrl(vehicle.imageUrl)} alt={`${vehicle.make} ${vehicle.model}`} />
+          ) : (
+            <span aria-hidden="true">vehicle photo</span>
+          )}
         </div>
         <div className="lot-card-header">
           <span className="lot-card-name">
@@ -62,7 +77,7 @@ export function HomePage() {
         <span className="lot-card-rate">{formatCurrency(vehicle.dailyRate)} / day</span>
         <button
           type="button"
-          className="btn btn-primary btn-sm"
+          className="btn btn-ghost btn-sm"
           disabled={!isAvailable}
           onClick={() => navigate(`/bookings/new?vehicleId=${vehicle.id}`)}
         >
@@ -80,6 +95,7 @@ export function HomePage() {
           <br />
           Book it in 30 seconds.
         </h1>
+        <div className="home-tagline-divider" aria-hidden="true" />
         <form className="quickbook-bar" onSubmit={handleCheckAvailability}>
           <div className="quickbook-field">
             <label htmlFor="quickbook-make">Vehicle / make</label>
@@ -92,22 +108,24 @@ export function HomePage() {
           </div>
           <div className="quickbook-field">
             <label htmlFor="quickbook-pickup">Pick-up date</label>
-            <input
+            <DatePicker
               id="quickbook-pickup"
-              type="date"
               min={today}
               value={pickupInput}
-              onChange={(event) => setPickupInput(event.target.value)}
+              onChange={setPickupInput}
+              rangeStart={pickupInput}
+              rangeEnd={returnInput}
             />
           </div>
           <div className="quickbook-field">
             <label htmlFor="quickbook-return">Return date</label>
-            <input
+            <DatePicker
               id="quickbook-return"
-              type="date"
               min={pickupInput || today}
               value={returnInput}
-              onChange={(event) => setReturnInput(event.target.value)}
+              onChange={setReturnInput}
+              rangeStart={pickupInput}
+              rangeEnd={returnInput}
             />
           </div>
           <button type="submit" className="btn btn-primary">
@@ -156,15 +174,22 @@ export function HomePage() {
         )}
       </section>
 
-      <div className="home-shortcuts">
-        <span>Staff shortcuts — bookings needing action, customer lookup, fleet admin</span>
-        <div className="home-shortcuts-actions">
-          <Link to="/bookings" className="btn btn-ghost btn-sm">
-            Bookings
-          </Link>
-          <Link to="/customers" className="btn btn-ghost btn-sm">
-            Customers
-          </Link>
+      <div className="home-banner">
+        <div className="home-banner-track">
+          <div className="home-banner-list">
+            {bannerItems.map((item) => (
+              <span className="home-banner-item" key={item}>
+                {item}
+              </span>
+            ))}
+          </div>
+          <div className="home-banner-list" aria-hidden="true">
+            {bannerItems.map((item, index) => (
+              <span className="home-banner-item" key={index}>
+                {item}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </div>

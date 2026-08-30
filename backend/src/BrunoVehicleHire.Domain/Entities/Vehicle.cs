@@ -8,6 +8,7 @@ public sealed class Vehicle : BaseEntity
     public int Year { get; private set; }
     public decimal DailyRate { get; private set; }
     public bool IsDeleted { get; private set; }
+    public string? ImageUrl { get; private set; }
 
     private Vehicle()
     {
@@ -52,5 +53,10 @@ public sealed class Vehicle : BaseEntity
     public void SoftDelete()
     {
         IsDeleted = true;
+    }
+
+    public void UpdateImage(string? imageUrl)
+    {
+        ImageUrl = imageUrl;
     }
 }

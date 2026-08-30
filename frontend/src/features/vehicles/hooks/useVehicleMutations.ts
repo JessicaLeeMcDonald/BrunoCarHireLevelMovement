@@ -36,3 +36,27 @@ export function useSoftDeleteVehicle() {
     },
   });
 }
+
+export function useUploadVehicleImage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) => vehiclesApi.uploadVehicleImage(id, file),
+    onSuccess: (_data, { id }) => {
+      queryClient.invalidateQueries({ queryKey: vehicleKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: vehicleKeys.detail(id) });
+    },
+  });
+}
+
+export function useDeleteVehicleImage() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => vehiclesApi.deleteVehicleImage(id),
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ queryKey: vehicleKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: vehicleKeys.detail(id) });
+    },
+  });
+}

@@ -7,4 +7,5 @@ export interface VehicleDto {
   dailyRate: number;
   isDeleted: boolean;
   createdDate: string;
+  imageUrl: string | null;
 }

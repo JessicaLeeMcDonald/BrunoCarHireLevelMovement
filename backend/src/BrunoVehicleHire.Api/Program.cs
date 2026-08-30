@@ -31,7 +31,7 @@ try
         .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
     builder.Services.AddApplication();
-    builder.Services.AddInfrastructure(builder.Configuration);
+    builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.WebRootPath);
 
     builder.Services
         .AddAuthentication(AuthConstants.SchemeName)
@@ -99,6 +99,8 @@ try
     app.UseSerilogRequestLogging();
 
     app.UseHttpsRedirection();
+
+    app.UseStaticFiles();
 
     app.UseCors("Frontend");
 

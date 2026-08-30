@@ -18,6 +18,9 @@ public static class DbSeeder
             Vehicle.Create("CA654321", "Volkswagen", "Polo", 2021, 400m),
             Vehicle.Create("CA789012", "Ford", "Ranger", 2023, 850m),
         };
+        vehicles[0].UpdateImage("/vehicle-images/seed/sedan.svg");
+        vehicles[1].UpdateImage("/vehicle-images/seed/hatchback.svg");
+        vehicles[2].UpdateImage("/vehicle-images/seed/pickup.svg");
         context.Vehicles.AddRange(vehicles);
 
         var customers = new[]

@@ -10,6 +10,7 @@ import { Pagination } from '../../../shared/components/Pagination';
 import { useDialog } from '../../../shared/hooks/useDialog';
 import { useToast } from '../../../shared/components/Toast/useToast';
 import { formatCurrency } from '../../../shared/utils/currency';
+import { toAbsoluteMediaUrl } from '../../../shared/utils/media';
 import type { Vehicle } from '../types/model';
 import { normalizeError } from '../../../shared/api/apiError';
 
@@ -54,6 +55,17 @@ export function VehicleListPage() {
   }
 
   const columns: DataTableColumn<Vehicle>[] = [
+    {
+      key: 'photo',
+      header: '',
+      render: (vehicle) => (
+        <div className="table-thumb">
+          {vehicle.imageUrl && (
+            <img src={toAbsoluteMediaUrl(vehicle.imageUrl)} alt={`${vehicle.make} ${vehicle.model}`} />
+          )}
+        </div>
+      ),
+    },
     { key: 'registration', header: 'Registration', render: (vehicle) => vehicle.registrationNumber },
     { key: 'vehicle', header: 'Vehicle', render: (vehicle) => `${vehicle.make} ${vehicle.model} (${vehicle.year})` },
     {

@@ -11,7 +11,7 @@ namespace BrunoVehicleHire.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration, string webRootPath)
     {
         var connectionString = configuration.GetConnectionString("Default")
             ?? throw new InvalidOperationException("Connection string 'Default' is not configured.");
@@ -23,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IBookingOverlapChecker, BookingOverlapChecker>();
+        services.AddSingleton<IVehicleImageStorage>(new LocalVehicleImageStorage(webRootPath));
 
         return services;
     }

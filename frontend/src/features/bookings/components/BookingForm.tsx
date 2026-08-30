@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { bookingFormSchema } from '../schemas/bookingSchema';
@@ -11,6 +11,7 @@ import type { Customer } from '../../customers/types/model';
 import { customerFullName } from '../../customers/types/model';
 import { formatCurrency } from '../../../shared/utils/currency';
 import { toIsoDate } from '../../../shared/utils/date';
+import { useBookings } from '../hooks/useBookings';
 
 interface BookingFormProps {
   vehicles: Vehicle[];
@@ -56,7 +57,22 @@ export function BookingForm({
 
   const startDate = watch('startDate');
   const endDate = watch('endDate');
+  const watchedVehicleId = watch('vehicleId');
   const today = toIsoDate(new Date());
+
+  const { data: vehicleBookings } = useBookings(
+    { vehicleId: watchedVehicleId || undefined, status: 'Active', pageSize: 100 },
+    { enabled: Boolean(watchedVehicleId) },
+  );
+
+  const unavailableRanges = useMemo(
+    () =>
+      (vehicleBookings?.items ?? []).map((booking) => ({
+        start: toIsoDate(booking.startDate),
+        end: toIsoDate(booking.endDate),
+      })),
+    [vehicleBookings],
+  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="form" noValidate>
@@ -88,6 +104,7 @@ export function BookingForm({
         min={today}
         startError={errors.startDate?.message}
         endError={errors.endDate?.message}
+        unavailableRanges={unavailableRanges}
       />
       {/* Booking conflicts double-signal deliberately: field error above, banner here. */}
       {serverError && <p className="form-error-banner">{serverError.firstMessage}</p>}

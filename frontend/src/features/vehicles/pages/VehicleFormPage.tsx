@@ -1,8 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { VehicleForm } from '../components/VehicleForm';
+import type { VehicleImageAction } from '../components/VehicleForm';
 import { useVehicle } from '../hooks/useVehicles';
-import { useCreateVehicle, useUpdateVehicle } from '../hooks/useVehicleMutations';
+import {
+  useCreateVehicle,
+  useUpdateVehicle,
+  useUploadVehicleImage,
+  useDeleteVehicleImage,
+} from '../hooks/useVehicleMutations';
 import { normalizeError } from '../../../shared/api/apiError';
 import type { ApiError } from '../../../shared/api/apiError';
 import { useToast } from '../../../shared/components/Toast/useToast';
@@ -20,17 +26,24 @@ export function VehicleFormPage() {
   const { data: vehicle, isLoading } = useVehicle(id);
   const createVehicle = useCreateVehicle();
   const updateVehicle = useUpdateVehicle(id ?? '');
+  const uploadVehicleImage = useUploadVehicleImage();
+  const deleteVehicleImage = useDeleteVehicleImage();
 
-  async function handleSubmit(values: VehicleFormValues) {
+  async function handleSubmit(values: VehicleFormValues, imageAction: VehicleImageAction) {
     setServerError(null);
     try {
+      const vehicleId = isEdit ? id! : (await createVehicle.mutateAsync(values)).id;
       if (isEdit) {
         await updateVehicle.mutateAsync(values);
-        showToast('Vehicle updated.', 'success');
-      } else {
-        await createVehicle.mutateAsync(values);
-        showToast('Vehicle created.', 'success');
       }
+
+      if (imageAction.file) {
+        await uploadVehicleImage.mutateAsync({ id: vehicleId, file: imageAction.file });
+      } else if (imageAction.remove) {
+        await deleteVehicleImage.mutateAsync(vehicleId);
+      }
+
+      showToast(isEdit ? 'Vehicle updated.' : 'Vehicle created.', 'success');
       navigate('/vehicles');
     } catch (error) {
       const apiError = normalizeError(error);
@@ -58,7 +71,12 @@ export function VehicleFormPage() {
         mode={isEdit ? 'edit' : 'create'}
         initialValues={vehicle}
         onSubmit={handleSubmit}
-        isSubmitting={createVehicle.isPending || updateVehicle.isPending}
+        isSubmitting={
+          createVehicle.isPending ||
+          updateVehicle.isPending ||
+          uploadVehicleImage.isPending ||
+          deleteVehicleImage.isPending
+        }
         serverError={serverError}
         onCancel={() => navigate('/vehicles')}
       />

@@ -1,3 +1,6 @@
+import { DatePicker } from './DatePicker';
+import type { DateRange } from './DatePicker';
+
 interface DateRangeFieldProps {
   startLabel?: string;
   endLabel?: string;
@@ -8,6 +11,7 @@ interface DateRangeFieldProps {
   min?: string;
   startError?: string;
   endError?: string;
+  unavailableRanges?: DateRange[];
 }
 
 export function DateRangeField({
@@ -20,28 +24,35 @@ export function DateRangeField({
   min,
   startError,
   endError,
+  unavailableRanges,
 }: DateRangeFieldProps) {
   return (
     <div className="date-range-field">
       <div className="form-field">
         <label htmlFor="booking-start-date">{startLabel}</label>
-        <input
+        <DatePicker
           id="booking-start-date"
-          type="date"
           value={startValue}
+          onChange={onStartChange}
           min={min}
-          onChange={(event) => onStartChange(event.target.value)}
+          unavailableRanges={unavailableRanges}
+          hasError={Boolean(startError)}
+          rangeStart={startValue}
+          rangeEnd={endValue}
         />
         {startError && <span className="form-error">{startError}</span>}
       </div>
       <div className="form-field">
         <label htmlFor="booking-end-date">{endLabel}</label>
-        <input
+        <DatePicker
           id="booking-end-date"
-          type="date"
           value={endValue}
+          onChange={onEndChange}
           min={startValue || min}
-          onChange={(event) => onEndChange(event.target.value)}
+          unavailableRanges={unavailableRanges}
+          hasError={Boolean(endError)}
+          rangeStart={startValue}
+          rangeEnd={endValue}
         />
         {endError && <span className="form-error">{endError}</span>}
       </div>

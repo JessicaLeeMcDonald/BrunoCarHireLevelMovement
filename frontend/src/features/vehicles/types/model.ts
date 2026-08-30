@@ -9,6 +9,7 @@ export interface Vehicle {
   dailyRate: number;
   isDeleted: boolean;
   createdDate: Date;
+  imageUrl: string | null;
 }
 
 export function toVehicleModel(dto: VehicleDto): Vehicle {

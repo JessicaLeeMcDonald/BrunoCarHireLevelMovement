@@ -6,12 +6,13 @@ import { toBookingModel } from '../types/model';
 import type { PagedResult } from '../../../shared/api/types';
 import type { Booking } from '../types/model';
 
-export function useBookings(filters: BookingListParams) {
+export function useBookings(filters: BookingListParams, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: bookingKeys.list(filters),
     queryFn: () => bookingsApi.getBookings(filters),
     select: (data): PagedResult<Booking> => ({ ...data, items: data.items.map(toBookingModel) }),
     placeholderData: keepPreviousData,
+    enabled: options?.enabled,
   });
 }
 

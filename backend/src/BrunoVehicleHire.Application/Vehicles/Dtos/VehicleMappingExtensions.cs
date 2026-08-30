@@ -12,5 +12,6 @@ public static class VehicleMappingExtensions
         vehicle.Year,
         vehicle.DailyRate,
         vehicle.IsDeleted,
-        vehicle.CreatedDate);
+        vehicle.CreatedDate,
+        vehicle.ImageUrl);
 }

@@ -52,4 +52,16 @@ export const vehiclesApi = {
   async softDeleteVehicle(id: string): Promise<void> {
     await axiosClient.delete(`/vehicles/${id}`);
   },
+
+  async uploadVehicleImage(id: string, file: File): Promise<VehicleDto> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const { data } = await axiosClient.post<VehicleDto>(`/vehicles/${id}/image`, formData);
+    return data;
+  },
+
+  async deleteVehicleImage(id: string): Promise<VehicleDto> {
+    const { data } = await axiosClient.delete<VehicleDto>(`/vehicles/${id}/image`);
+    return data;
+  },
 };

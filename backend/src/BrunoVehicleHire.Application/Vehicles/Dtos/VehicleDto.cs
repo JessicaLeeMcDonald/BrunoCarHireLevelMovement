@@ -8,4 +8,5 @@ public sealed record VehicleDto(
     int Year,
     decimal DailyRate,
     bool IsDeleted,
-    DateTime CreatedDate);
+    DateTime CreatedDate,
+    string? ImageUrl);

@@ -1,7 +1,9 @@
 using BrunoVehicleHire.Application.Common.Models;
 using BrunoVehicleHire.Application.Vehicles.Commands.CreateVehicle;
+using BrunoVehicleHire.Application.Vehicles.Commands.DeleteVehicleImage;
 using BrunoVehicleHire.Application.Vehicles.Commands.SoftDeleteVehicle;
 using BrunoVehicleHire.Application.Vehicles.Commands.UpdateVehicle;
+using BrunoVehicleHire.Application.Vehicles.Commands.UpdateVehicleImage;
 using BrunoVehicleHire.Application.Vehicles.Dtos;
 using BrunoVehicleHire.Application.Vehicles.Queries.GetVehicleById;
 using BrunoVehicleHire.Application.Vehicles.Queries.GetVehiclesList;
@@ -86,6 +88,46 @@ public sealed class VehiclesController : ControllerBase
         await _sender.Send(new SoftDeleteVehicleCommand(id), ct);
         return NoContent();
     }
+
+    /// <summary>Upload or replace a vehicle's photo. Accepts JPEG, PNG or WEBP up to 5 MB.</summary>
+    [HttpPost("{id:guid}/image")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(VehicleDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [RequestSizeLimit(MaxImageBytes)]
+    public async Task<ActionResult<VehicleDto>> UploadImage(Guid id, IFormFile file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0)
+            return BadRequest("An image file is required.");
+        if (file.Length > MaxImageBytes)
+            return BadRequest("Image must be 5 MB or smaller.");
+        if (!AllowedImageContentTypes.TryGetValue(file.ContentType, out var extension))
+            return BadRequest("Image must be JPEG, PNG or WEBP.");
+
+        await using var stream = file.OpenReadStream();
+        var result = await _sender.Send(new UpdateVehicleImageCommand(id, stream, extension), ct);
+        return Ok(result);
+    }
+
+    /// <summary>Remove a vehicle's photo.</summary>
+    [HttpDelete("{id:guid}/image")]
+    [ProducesResponseType(typeof(VehicleDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<VehicleDto>> DeleteImage(Guid id, CancellationToken ct)
+    {
+        var result = await _sender.Send(new DeleteVehicleImageCommand(id), ct);
+        return Ok(result);
+    }
+
+    private const long MaxImageBytes = 5 * 1024 * 1024;
+
+    private static readonly Dictionary<string, string> AllowedImageContentTypes = new()
+    {
+        ["image/jpeg"] = ".jpg",
+        ["image/png"] = ".png",
+        ["image/webp"] = ".webp",
+    };
 }
 
 /// <summary>Request body for updating a vehicle's mutable details.</summary>

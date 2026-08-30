@@ -15,6 +15,7 @@ public sealed class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
         builder.Property(v => v.Make).IsRequired().HasMaxLength(50);
         builder.Property(v => v.Model).IsRequired().HasMaxLength(50);
         builder.Property(v => v.DailyRate).HasColumnType("decimal(10,2)");
+        builder.Property(v => v.ImageUrl).HasMaxLength(500);
 
         builder.HasIndex(v => v.RegistrationNumber).IsUnique().HasDatabaseName("IX_Vehicles_RegistrationNumber");
 
