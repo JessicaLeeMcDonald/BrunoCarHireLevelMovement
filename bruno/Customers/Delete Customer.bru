@@ -1,0 +1,15 @@
+meta {
+  name: Delete Customer
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/customers/:id
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 00000000-0000-0000-0000-000000000000
+}

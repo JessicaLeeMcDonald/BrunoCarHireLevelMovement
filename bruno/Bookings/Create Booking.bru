@@ -1,0 +1,20 @@
+meta {
+  name: Create Booking
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/bookings
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "vehicleId": "00000000-0000-0000-0000-000000000000",
+    "customerId": "00000000-0000-0000-0000-000000000000",
+    "startDate": "2026-09-12",
+    "endDate": "2026-09-16"
+  }
+}

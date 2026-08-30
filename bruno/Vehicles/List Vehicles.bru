@@ -1,0 +1,22 @@
+meta {
+  name: List Vehicles
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/vehicles?pageNumber=1&pageSize=20
+  body: none
+  auth: none
+}
+
+params:query {
+  pageNumber: 1
+  pageSize: 20
+  make:
+  model:
+  availableOnly:
+  includeDeleted: false
+  availableFrom:
+  availableTo:
+}

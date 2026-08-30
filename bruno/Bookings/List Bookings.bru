@@ -1,0 +1,25 @@
+meta {
+  name: List Bookings
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/bookings?pageNumber=1&pageSize=20
+  body: none
+  auth: none
+}
+
+params:query {
+  pageNumber: 1
+  pageSize: 20
+  vehicleId: 
+  customerId: 
+  status: 
+  from: 
+  to: 
+}
+
+vars:pre-request {
+  baseUrl: http://localhost:5080/api 
+}

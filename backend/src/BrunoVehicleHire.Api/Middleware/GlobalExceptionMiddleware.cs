@@ -54,7 +54,7 @@ public sealed class GlobalExceptionMiddleware
         context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = problemDetails.Status ?? (int)HttpStatusCode.InternalServerError;
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(problemDetails));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(problemDetails, problemDetails.GetType()));
     }
 
     private static ProblemDetails BuildValidationProblem(ValidationException validationEx)

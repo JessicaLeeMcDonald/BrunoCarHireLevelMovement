@@ -1,0 +1,15 @@
+meta {
+  name: Delete Vehicle Image
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{baseUrl}}/vehicles/:id/image
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 00000000-0000-0000-0000-000000000000
+}

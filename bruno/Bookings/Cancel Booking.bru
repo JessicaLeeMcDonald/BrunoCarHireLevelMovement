@@ -1,0 +1,15 @@
+meta {
+  name: Cancel Booking
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/bookings/:id/cancel
+  body: none
+  auth: none
+}
+
+params:path {
+  id: 00000000-0000-0000-0000-000000000000
+}
