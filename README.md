@@ -1,9 +1,12 @@
 # Bruno Vehicle Hire
 
 [![Backend Tests](https://github.com/JessicaLeeMcDonald/BrunoCarHireLevelMovement/actions/workflows/tests.yml/badge.svg)](https://github.com/JessicaLeeMcDonald/BrunoCarHireLevelMovement/actions/workflows/tests.yml)
+[![Frontend CI](https://github.com/JessicaLeeMcDonald/BrunoCarHireLevelMovement/actions/workflows/frontend.yml/badge.svg)](https://github.com/JessicaLeeMcDonald/BrunoCarHireLevelMovement/actions/workflows/frontend.yml)
+[![Docker Build](https://github.com/JessicaLeeMcDonald/BrunoCarHireLevelMovement/actions/workflows/docker-build.yml/badge.svg)](https://github.com/JessicaLeeMcDonald/BrunoCarHireLevelMovement/actions/workflows/docker-build.yml)
+[![CodeQL](https://github.com/JessicaLeeMcDonald/BrunoCarHireLevelMovement/actions/workflows/codeql.yml/badge.svg)](https://github.com/JessicaLeeMcDonald/BrunoCarHireLevelMovement/actions/workflows/codeql.yml)
 [![Release](https://img.shields.io/github/v/release/JessicaLeeMcDonald/BrunoCarHireLevelMovement?label=version&sort=semver)](https://github.com/JessicaLeeMcDonald/BrunoCarHireLevelMovement/releases)
 ![Tests](https://img.shields.io/badge/tests-13%2F13%20passing-2ea44f)
-![Coverage](https://img.shields.io/badge/coverage-25%25%20(scoped)-blue)
+![Coverage](<https://img.shields.io/badge/coverage-25%25%20(scoped)-blue>)
 
 A full-stack vehicle hire management system — vehicles, customers, and bookings, with Clean Architecture + CQRS on the backend and a feature-based React frontend.
 
@@ -91,7 +94,7 @@ Two ways to run this: fully containerized (fastest, nothing but Docker required)
 
 ### Option A — Fully Dockerized
 
-**Prerequisite:** Docker Desktop only — no .NET SDK or Node.js needed on the host at all.
+**Prerequisite:** Docker Desktop only.
 
 ```bash
 docker compose up -d --build
@@ -108,19 +111,19 @@ Migrations and seeding still happen automatically on the API container's first s
 - Frontend: `http://localhost:5173`
 - API / Swagger: `http://localhost:5080/swagger`
 
-`docker compose down` stops everything (add `-v` only if you actually want to wipe the database and uploaded images — the named volumes otherwise persist across restarts).
+`docker compose down` stops everything (add `-v` wipe the database and uploaded images — the named volumes otherwise persist across restarts).
 
 ### Option B — Native, with hot reload
 
-**Prerequisites:** .NET 10 SDK, Node.js 20+, Docker Desktop (SQL Server still runs in a container either way).
+**Prerequisites:** .NET 10 SDK, Node.js 20+, Docker Desktop.
 
 ```powershell
 .\setup.ps1
 ```
 
-This single script does everything that used to be five manual steps: starts SQL Server in Docker and waits for it to report healthy, configures the backend's connection string and API key via `dotnet user-secrets` (nothing sensitive ever touches a committed file), writes `frontend/.env.local`, and restores/installs both projects' packages. It's idempotent — re-running it is always safe, and it won't overwrite an `.env.local` you've already customized. Pass `-ApiKey "your-own-key"` for a different dev key.
+This single script: starts SQL Server in Docker and waits for it to report healthy, configures the backend's connection string and API key via `dotnet user-secrets`, writes `frontend/.env.local`, and restores/installs both projects' packages. It's idempotent — re-running it is always safe, and it won't overwrite an `.env.local` you've already customized. Pass `-ApiKey "your-own-key"` for a different dev key.
 
-Then, in two terminals:
+In two terminals:
 
 ```bash
 cd backend && dotnet run --project src/BrunoVehicleHire.Api
@@ -168,22 +171,22 @@ Every push and PR to `main` also runs this in CI — see [`.github/workflows/tes
 
 ### Results (last full run)
 
-| | |
-|---|---|
-| **Result** | ✅ **13 / 13 passing** — 0 failed, 0 skipped |
-| **Duration** | ~75 ms (mocked repositories, no database) |
+|                      |                                                     |
+| -------------------- | --------------------------------------------------- |
+| **Result**           | ✅ **13 / 13 passing** — 0 failed, 0 skipped        |
+| **Duration**         | ~75 ms (mocked repositories, no database)           |
 | **Required minimum** | 2 commands ✓ · 2 queries ✓ · 1 business-rule test ✓ |
 
 <details>
 <summary><strong>Full breakdown by required category</strong></summary>
 
-| Category | Test class | Cases | What it proves |
-|---|---|:-:|---|
-| Business rule | `DateRangeOverlapTests` | 5 | `EndDate > StartDate` is enforced at construction; `OverlapsWith` correctly detects overlap across 4 date-range scenarios (partial overlap, adjacent-not-overlapping, disjoint, fully-contained) — tested directly on the value object, zero mocks |
-| Command | `CreateBookingCommandHandlerTests` | 2 | A valid booking is created with the correct calculated `TotalPrice`; an overlapping booking throws `OverlappingBookingException` and never reaches `SaveChanges` |
-| Command | `SoftDeleteVehicleCommandHandlerTests` | 2 | An existing vehicle is marked deleted and saved; a missing vehicle throws `NotFoundException` |
-| Query | `GetVehiclesListQueryHandlerTests` | 2 | Repository results map correctly into a `PagedResult<VehicleDto>`; out-of-range pagination input is normalized rather than erroring |
-| Query | `GetBookingByIdQueryHandlerTests` | 2 | An existing booking maps to its DTO; a missing booking throws `NotFoundException` |
+| Category      | Test class                             | Cases | What it proves                                                                                                                                                                                                                                     |
+| ------------- | -------------------------------------- | :---: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Business rule | `DateRangeOverlapTests`                |   5   | `EndDate > StartDate` is enforced at construction; `OverlapsWith` correctly detects overlap across 4 date-range scenarios (partial overlap, adjacent-not-overlapping, disjoint, fully-contained) — tested directly on the value object, zero mocks |
+| Command       | `CreateBookingCommandHandlerTests`     |   2   | A valid booking is created with the correct calculated `TotalPrice`; an overlapping booking throws `OverlappingBookingException` and never reaches `SaveChanges`                                                                                   |
+| Command       | `SoftDeleteVehicleCommandHandlerTests` |   2   | An existing vehicle is marked deleted and saved; a missing vehicle throws `NotFoundException`                                                                                                                                                      |
+| Query         | `GetVehiclesListQueryHandlerTests`     |   2   | Repository results map correctly into a `PagedResult<VehicleDto>`; out-of-range pagination input is normalized rather than erroring                                                                                                                |
+| Query         | `GetBookingByIdQueryHandlerTests`      |   2   | An existing booking maps to its DTO; a missing booking throws `NotFoundException`                                                                                                                                                                  |
 
 </details>
 
@@ -192,12 +195,12 @@ Every push and PR to `main` also runs this in CI — see [`.github/workflows/tes
 <details>
 <summary><strong>25% overall (Domain 58% · Application 26% · Infrastructure 0%) — scope is deliberate, see below</strong></summary>
 
-| Layer | Line coverage | Why |
-|---|:-:|---|
-| `Domain` | **58%** | Entities and `DateRange` carry the real business rules — this is the layer the required business-rule test targets directly, and it shows. |
-| `Application` | **26%** | The 4 required handlers (2 commands, 2 queries) are covered at 90–100%; the other CRUD handlers, validators, and DI wiring were out of scope for the assessment's stated minimum and are exercised manually via Swagger/Bruno instead of by a unit test. |
-| `Infrastructure` | **0%** | Repository/EF Core code needs a real database to test meaningfully — mocking `DbContext` directly is famously awkward and tests little of value. This is intentionally an **integration-test gap**, not a unit-test gap: the honest fix is tests against a real (test-container) SQL Server, not more mocks. |
-| *(EF Core migrations excluded)* | — | Auto-generated scaffolding, not hand-written logic — including them would dilute the number without saying anything real. |
+| Layer                           | Line coverage | Why                                                                                                                                                                                                                                                                                                          |
+| ------------------------------- | :-----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Domain`                        |    **58%**    | Entities and `DateRange` carry the real business rules — this is the layer the required business-rule test targets directly, and it shows.                                                                                                                                                                   |
+| `Application`                   |    **26%**    | The 4 required handlers (2 commands, 2 queries) are covered at 90–100%; the other CRUD handlers, validators, and DI wiring were out of scope for the assessment's stated minimum and are exercised manually via Swagger/Bruno instead of by a unit test.                                                     |
+| `Infrastructure`                |    **0%**     | Repository/EF Core code needs a real database to test meaningfully — mocking `DbContext` directly is famously awkward and tests little of value. This is intentionally an **integration-test gap**, not a unit-test gap: the honest fix is tests against a real (test-container) SQL Server, not more mocks. |
+| _(EF Core migrations excluded)_ |       —       | Auto-generated scaffolding, not hand-written logic — including them would dilute the number without saying anything real.                                                                                                                                                                                    |
 
 **Why not chase a higher number:** the required minimum was 2 commands, 2 queries, and 1 business-rule test — met exactly, and covered at 90–100% each. The 25% aggregate reflects an intentionally narrow, high-value test surface rather than broad shallow coverage across code that's better verified by an integration test or manual API exercise. See the [Assumptions](#assumptions) section and the project's interview notes for the fuller version of this trade-off.
 
