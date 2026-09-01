@@ -87,52 +87,75 @@ frontend/src/
 
 ## Getting started
 
-### Prerequisites
+Two ways to run this: fully containerized (fastest, nothing but Docker required), or natively on your machine (better for active development — hot reload on both sides).
 
-- .NET 10 SDK
-- Node.js 20+ and npm
-- Docker (for SQL Server)
+### Option A — Fully Dockerized
 
-### 1. Start SQL Server
+**Prerequisite:** Docker Desktop only — no .NET SDK or Node.js needed on the host at all.
 
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 
-This starts `mcr.microsoft.com/mssql/server:2022-latest` on port 1433.
+This builds and runs all three services — SQL Server, the API, and the frontend — each from its own `Dockerfile` ([`backend/Dockerfile`](backend/Dockerfile), [`frontend/Dockerfile`](frontend/Dockerfile)):
 
-### 2. Configure local secrets (one-time per machine)
+- **`sqlserver`** — unchanged, with a healthcheck the other services wait on.
+- **`api`** — multi-stage build (SDK image to publish, `aspnet` runtime image to run); the connection string and API key are supplied as environment variables in `docker-compose.yml` rather than `dotnet user-secrets` (which is a local-machine-only mechanism that doesn't exist inside a container) — same dev-only values used everywhere else in this README. Uploaded vehicle photos persist in a named volume (`vehicle-images`) across container recreates.
+- **`frontend`** — multi-stage build (Node to run `vite build`, then a minimal `nginx` image to serve the static output), with an `nginx.conf` that falls back to `index.html` for client-side routes so refreshing `/vehicles` doesn't 404.
 
-The connection string and API key are never committed — they're stored via `dotnet user-secrets`, outside the repo:
+Migrations and seeding still happen automatically on the API container's first start, exactly as they do natively. Once it's up:
+
+- Frontend: `http://localhost:5173`
+- API / Swagger: `http://localhost:5080/swagger`
+
+`docker compose down` stops everything (add `-v` only if you actually want to wipe the database and uploaded images — the named volumes otherwise persist across restarts).
+
+### Option B — Native, with hot reload
+
+**Prerequisites:** .NET 10 SDK, Node.js 20+, Docker Desktop (SQL Server still runs in a container either way).
+
+```powershell
+.\setup.ps1
+```
+
+This single script does everything that used to be five manual steps: starts SQL Server in Docker and waits for it to report healthy, configures the backend's connection string and API key via `dotnet user-secrets` (nothing sensitive ever touches a committed file), writes `frontend/.env.local`, and restores/installs both projects' packages. It's idempotent — re-running it is always safe, and it won't overwrite an `.env.local` you've already customized. Pass `-ApiKey "your-own-key"` for a different dev key.
+
+Then, in two terminals:
 
 ```bash
+cd backend && dotnet run --project src/BrunoVehicleHire.Api
+```
+
+```bash
+cd frontend && npm run dev
+```
+
+Open `http://localhost:5173`. Swagger UI is at `http://localhost:5080/swagger` (use the "Authorize" button with the API key to try authenticated requests).
+
+<details>
+<summary><strong>Doing Option B by hand instead (no PowerShell, e.g. macOS/Linux)</strong></summary>
+
+```bash
+# 1. Start SQL Server
+docker compose up -d sqlserver --wait
+
+# 2. Configure backend secrets (never committed)
 cd backend/src/BrunoVehicleHire.Api
 dotnet user-secrets set "ConnectionStrings:Default" "Server=localhost,1433;Database=BrunoVehicleHire;User Id=sa;Password=BrunoDev!2026;TrustServerCertificate=True"
 dotnet user-secrets set "ApiKey:Value" "bruno-dev-local-key-2026"
-```
+cd ../../..
 
-(The password above matches the SQL Server container started in step 1. You can pick your own API key value instead — just use the same one in step 4.)
-
-### 3. Run the backend API
-
-```bash
-cd backend
-dotnet run --project src/BrunoVehicleHire.Api
-```
-
-On startup in the `Development` environment, the app automatically applies EF Core migrations and seeds a few vehicles, customers, and bookings if the database is empty (`DbSeeder`) — no manual migration step needed. The API listens on `http://localhost:5080`; Swagger UI is at `http://localhost:5080/swagger` (use the "Authorize" button with the API key from step 2 to try authenticated requests).
-
-### 4. Run the frontend
-
-```bash
+# 3. Frontend environment
 cd frontend
 cp .env.example .env.local
-# edit .env.local: set VITE_API_KEY to the same value you used in step 2
+# edit .env.local: set VITE_API_KEY to the same value used above
 npm install
-npm run dev
+cd ..
 ```
 
-Open `http://localhost:5173`.
+Then run the backend and frontend as shown above.
+
+</details>
 
 ## Running tests
 

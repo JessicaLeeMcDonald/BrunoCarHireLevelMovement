@@ -15,5 +15,36 @@ services:
       timeout: 5s
       retries: 10
 
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bruno-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Default: "Server=sqlserver,1433;Database=BrunoVehicleHire;User Id=sa;Password=${MSSQL_SA_PASSWORD:-BrunoDev!2026};TrustServerCertificate=True"
+      ApiKey__Value: "${API_KEY:-bruno-dev-local-key-2026}"
+    ports:
+      - "5080:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    volumes:
+      - vehicle-images:/app/wwwroot/vehicle-images
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:5080/api
+        VITE_API_KEY: "${API_KEY:-bruno-dev-local-key-2026}"
+    container_name: bruno-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
 volumes:
   sqlserver-data:
+  vehicle-images:
