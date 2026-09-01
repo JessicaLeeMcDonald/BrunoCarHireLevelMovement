@@ -1,5 +1,10 @@
 # Bruno Vehicle Hire
 
+[![Backend Tests](https://github.com/JessicaLeeMcDonald/BrunoCarHireLevelMovement/actions/workflows/tests.yml/badge.svg)](https://github.com/JessicaLeeMcDonald/BrunoCarHireLevelMovement/actions/workflows/tests.yml)
+[![Release](https://img.shields.io/github/v/release/JessicaLeeMcDonald/BrunoCarHireLevelMovement?label=version&sort=semver)](https://github.com/JessicaLeeMcDonald/BrunoCarHireLevelMovement/releases)
+![Tests](https://img.shields.io/badge/tests-13%2F13%20passing-2ea44f)
+![Coverage](https://img.shields.io/badge/coverage-25%25%20(scoped)-blue)
+
 A full-stack vehicle hire management system — vehicles, customers, and bookings, with Clean Architecture + CQRS on the backend and a feature-based React frontend.
 
 ## Tech stack
@@ -136,9 +141,52 @@ cd backend
 dotnet test
 ```
 
-13 tests: `DateRangeOverlapTests` (the required business-rule test), `CreateBookingCommandHandlerTests` + `SoftDeleteVehicleCommandHandlerTests` (the required 2 command tests), `GetVehiclesListQueryHandlerTests` + `GetBookingByIdQueryHandlerTests` (the required 2 query tests) — all against mocked repositories via Moq, no database involved.
+Every push and PR to `main` also runs this in CI — see [`.github/workflows/tests.yml`](.github/workflows/tests.yml). The workflow runs the full suite with code coverage collection (`coverlet`) and publishes a coverage report to the run's job summary, so results are visible without downloading anything.
+
+### Results (last full run)
+
+| | |
+|---|---|
+| **Result** | ✅ **13 / 13 passing** — 0 failed, 0 skipped |
+| **Duration** | ~75 ms (mocked repositories, no database) |
+| **Required minimum** | 2 commands ✓ · 2 queries ✓ · 1 business-rule test ✓ |
+
+<details>
+<summary><strong>Full breakdown by required category</strong></summary>
+
+| Category | Test class | Cases | What it proves |
+|---|---|:-:|---|
+| Business rule | `DateRangeOverlapTests` | 5 | `EndDate > StartDate` is enforced at construction; `OverlapsWith` correctly detects overlap across 4 date-range scenarios (partial overlap, adjacent-not-overlapping, disjoint, fully-contained) — tested directly on the value object, zero mocks |
+| Command | `CreateBookingCommandHandlerTests` | 2 | A valid booking is created with the correct calculated `TotalPrice`; an overlapping booking throws `OverlappingBookingException` and never reaches `SaveChanges` |
+| Command | `SoftDeleteVehicleCommandHandlerTests` | 2 | An existing vehicle is marked deleted and saved; a missing vehicle throws `NotFoundException` |
+| Query | `GetVehiclesListQueryHandlerTests` | 2 | Repository results map correctly into a `PagedResult<VehicleDto>`; out-of-range pagination input is normalized rather than erroring |
+| Query | `GetBookingByIdQueryHandlerTests` | 2 | An existing booking maps to its DTO; a missing booking throws `NotFoundException` |
+
+</details>
+
+### Coverage
+
+<details>
+<summary><strong>25% overall (Domain 58% · Application 26% · Infrastructure 0%) — scope is deliberate, see below</strong></summary>
+
+| Layer | Line coverage | Why |
+|---|:-:|---|
+| `Domain` | **58%** | Entities and `DateRange` carry the real business rules — this is the layer the required business-rule test targets directly, and it shows. |
+| `Application` | **26%** | The 4 required handlers (2 commands, 2 queries) are covered at 90–100%; the other CRUD handlers, validators, and DI wiring were out of scope for the assessment's stated minimum and are exercised manually via Swagger/Bruno instead of by a unit test. |
+| `Infrastructure` | **0%** | Repository/EF Core code needs a real database to test meaningfully — mocking `DbContext` directly is famously awkward and tests little of value. This is intentionally an **integration-test gap**, not a unit-test gap: the honest fix is tests against a real (test-container) SQL Server, not more mocks. |
+| *(EF Core migrations excluded)* | — | Auto-generated scaffolding, not hand-written logic — including them would dilute the number without saying anything real. |
+
+**Why not chase a higher number:** the required minimum was 2 commands, 2 queries, and 1 business-rule test — met exactly, and covered at 90–100% each. The 25% aggregate reflects an intentionally narrow, high-value test surface rather than broad shallow coverage across code that's better verified by an integration test or manual API exercise. See the [Assumptions](#assumptions) section and the project's interview notes for the fuller version of this trade-off.
+
+</details>
 
 The frontend has no dedicated unit test suite (only the backend tests were required by the assessment); `npm run build` (type-checks with `tsc -b`) and `npm run lint` (oxlint) are the frontend's correctness gates.
+
+## Versioning
+
+Semantic version tags (`vMAJOR.MINOR.PATCH`) are cut automatically by [`.github/workflows/release.yml`](.github/workflows/release.yml) on every push to `main` — it bumps the patch version, tags it, and publishes a matching GitHub Release. The badge at the top of this README always reflects the latest release.
+
+To bump minor or major instead of the default patch, include `#minor` or `#major` anywhere in the commit message.
 
 ## Seed data
 

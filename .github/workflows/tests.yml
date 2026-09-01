@@ -1,0 +1,62 @@
+name: Backend Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run unit tests + coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore backend/BrunoVehicleHire.slnx
+
+      - name: Build
+        run: dotnet build backend/BrunoVehicleHire.slnx --no-restore --configuration Release
+
+      - name: Test with coverage
+        run: >
+          dotnet test backend/tests/BrunoVehicleHire.Tests/BrunoVehicleHire.Tests.csproj
+          --no-build --configuration Release
+          --logger "trx;LogFileName=test-results.trx"
+          --collect:"XPlat Code Coverage"
+          --results-directory ./coverage
+
+      - name: Generate coverage report
+        if: always()
+        uses: danielpalme/ReportGenerator-GitHub-Action@5
+        with:
+          reports: 'coverage/**/coverage.cobertura.xml'
+          targetdir: 'coverage-report'
+          reporttypes: 'MarkdownSummaryGithub;Html'
+
+      - name: Publish summary
+        if: always()
+        run: cat coverage-report/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage-report
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/test-results.trx'
