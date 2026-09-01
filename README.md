@@ -43,6 +43,17 @@ Each layer only depends on the layers "below" it (`Api → Application + Infrast
 - `GlobalExceptionMiddleware` maps every domain exception to an RFC7807 `ProblemDetails` response with the correct status code (400/404/409/500) and, for field-attributable errors, an `errors: { fieldName: [...] }` dictionary that the frontend consumes directly.
 - Mapping is manual (`ToDto()` extension methods) rather than AutoMapper — a deliberate call given the small number of entities; it keeps the mapping explicit and avoids reflection overhead for no real benefit here.
 
+**Design patterns in use**
+
+Beyond the required Repository/CQRS/MediatR/Unit of Work, a few classic patterns fall out of the design naturally rather than being bolted on:
+
+- **Factory Method** — `Vehicle.Create()`, `Customer.Create()`, `Booking.Create()` are the only way to construct these entities (private parameterless constructors for EF Core only). Each factory enforces its invariants at construction time, so an invalid entity can never exist.
+- **Observer** — `Booking.Create()` raises `BookingCreatedEvent`; `UnitOfWork.SaveChangesAsync` collects and publishes it via MediatR's `IPublisher`, and `BookingCreatedEventHandler` subscribes independently. The entity has no idea anything is listening.
+- **Value Object** — `DateRange` is immutable and equality-by-value, encapsulating the overlap/ordering rules so they can't be re-implemented (or gotten wrong) elsewhere.
+- **Pipeline/Decorator** — `ValidationBehavior<TRequest, TResponse>` wraps every command/query handler via MediatR's pipeline behaviors, running FluentValidation before the handler ever executes, without any handler needing to know validation happened.
+
+Deliberately not reached for: Strategy, Builder, Singleton, Adapter, etc. — the domain here is three entities and one real business rule, and forcing in more named patterns than the problem calls for would be over-engineering, not sophistication.
+
 ### Frontend — feature-based React
 
 ```
