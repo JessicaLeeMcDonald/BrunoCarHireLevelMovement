@@ -23,7 +23,7 @@ public sealed class DeleteVehicleImageCommandHandler : IRequestHandler<DeleteVeh
         var vehicle = await _unitOfWork.Vehicles.GetByIdAsync(request.VehicleId, cancellationToken)
             ?? throw new NotFoundException(nameof(Vehicle), request.VehicleId);
 
-        _imageStorage.Delete(vehicle.ImageUrl);
+        await _imageStorage.DeleteAsync(vehicle.ImageUrl, cancellationToken);
         vehicle.UpdateImage(null);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

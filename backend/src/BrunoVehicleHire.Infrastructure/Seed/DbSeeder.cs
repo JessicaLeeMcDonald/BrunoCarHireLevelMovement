@@ -7,9 +7,9 @@ namespace BrunoVehicleHire.Infrastructure.Seed;
 
 public static class DbSeeder
 {
-    public static async Task SeedAsync(AppDbContext context)
+    public static async Task SeedAsync(AppDbContext context, CancellationToken ct = default)
     {
-        if (await context.Vehicles.IgnoreQueryFilters().AnyAsync())
+        if (await context.Vehicles.IgnoreQueryFilters().AnyAsync(ct))
             return;
 
         var vehicles = new[]
@@ -30,7 +30,7 @@ public static class DbSeeder
         };
         context.Customers.AddRange(customers);
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(ct);
 
         var today = DateTime.UtcNow.Date;
 
@@ -47,6 +47,6 @@ public static class DbSeeder
 
         context.Bookings.AddRange(upcomingBooking, pastBooking);
 
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(ct);
     }
 }

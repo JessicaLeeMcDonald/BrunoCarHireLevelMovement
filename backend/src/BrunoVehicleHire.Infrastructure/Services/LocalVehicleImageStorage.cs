@@ -27,13 +27,17 @@ public sealed class LocalVehicleImageStorage : IVehicleImageStorage
         return $"/{RelativeFolder}/{fileName}";
     }
 
-    public void Delete(string? imageUrl)
+    public Task DeleteAsync(string? imageUrl, CancellationToken ct = default)
     {
+        ct.ThrowIfCancellationRequested();
+
         if (string.IsNullOrWhiteSpace(imageUrl))
-            return;
+            return Task.CompletedTask;
 
         var fullPath = Path.Combine(_rootPath, Path.GetFileName(imageUrl));
         if (File.Exists(fullPath))
             File.Delete(fullPath);
+
+        return Task.CompletedTask;
     }
 }

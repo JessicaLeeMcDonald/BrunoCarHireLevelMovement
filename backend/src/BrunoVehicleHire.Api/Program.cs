@@ -82,10 +82,11 @@ try
 
     if (app.Environment.IsDevelopment())
     {
+        var startupCt = app.Lifetime.ApplicationStopping;
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await db.Database.MigrateAsync();
-        await DbSeeder.SeedAsync(db);
+        await db.Database.MigrateAsync(startupCt);
+        await DbSeeder.SeedAsync(db, startupCt);
     }
 
     app.UseMiddleware<GlobalExceptionMiddleware>();
