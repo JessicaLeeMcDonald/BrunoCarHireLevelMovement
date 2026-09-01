@@ -1,8 +1,0 @@
-@BrunoVehicleHire.Api_HostAddress = http://localhost:5069
-@ApiKey = bruno-dev-local-key-2026
-
-GET {{BrunoVehicleHire.Api_HostAddress}}/api/vehicles
-X-Api-Key: {{ApiKey}}
-Accept: application/json
-
-###

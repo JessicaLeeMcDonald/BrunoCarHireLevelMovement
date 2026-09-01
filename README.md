@@ -1,6 +1,6 @@
 # Bruno Vehicle Hire
 
-A full-stack vehicle hire management system built for the "Solid Developer" assessment — vehicles, customers, and bookings, with Clean Architecture + CQRS on the backend and a feature-based React frontend.
+A full-stack vehicle hire management system — vehicles, customers, and bookings, with Clean Architecture + CQRS on the backend and a feature-based React frontend.
 
 ## Tech stack
 
@@ -34,7 +34,7 @@ Each layer only depends on the layers "below" it (`Api → Application + Infrast
 
 - `Vehicle`, `Customer`, `Booking` are rich entities — business rules live on the entity (`Vehicle.SoftDelete()`, `Booking.Cancel()`/`Complete()`/`Delete()` all self-validate and throw domain exceptions on an invalid transition).
 - `DateRange` is a value object encapsulating the `EndDate > StartDate` rule and pairwise overlap detection (`OverlapsWith`) — this is what `DateRangeOverlapTests` exercises directly, with no mocks.
-- Checking whether a *new* booking overlaps *other* bookings requires querying the database, which a single entity can't do — that's `IBookingOverlapChecker`, a domain-defined interface implemented in Infrastructure and called from `CreateBookingCommandHandler` before constructing the `Booking`.
+- Checking whether a _new_ booking overlaps _other_ bookings requires querying the database, which a single entity can't do — that's `IBookingOverlapChecker`, a domain-defined interface implemented in Infrastructure and called from `CreateBookingCommandHandler` before constructing the `Booking`.
 - `BookingCreatedEvent` demonstrates the domain events pattern (bonus requirement): raised inside `Booking.Create`, collected and dispatched by `UnitOfWork.SaveChangesAsync` via a generic `DomainEventNotification<T>` wrapper (keeps `IDomainEvent` free of any MediatR dependency), handled by a logging handler in the Application layer.
 
 **API highlights**
@@ -52,7 +52,7 @@ Beyond the required Repository/CQRS/MediatR/Unit of Work, a few classic patterns
 - **Value Object** — `DateRange` is immutable and equality-by-value, encapsulating the overlap/ordering rules so they can't be re-implemented (or gotten wrong) elsewhere.
 - **Pipeline/Decorator** — `ValidationBehavior<TRequest, TResponse>` wraps every command/query handler via MediatR's pipeline behaviors, running FluentValidation before the handler ever executes, without any handler needing to know validation happened.
 
-Deliberately not reached for: Strategy, Builder, Singleton, Adapter, etc. — the domain here is three entities and one real business rule, and forcing in more named patterns than the problem calls for would be over-engineering, not sophistication.
+Deliberately not reached for: Strategy, Builder, Singleton, Adapter, etc. — the domain here is three entities and one real business rule, and forcing in more named patterns than the problem calls for would be over-engineering.
 
 ### Frontend — feature-based React
 
