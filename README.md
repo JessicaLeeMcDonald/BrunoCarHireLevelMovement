@@ -41,9 +41,9 @@ Each layer only depends on the layers "below" it (`Api → Application + Infrast
 **Domain highlights**
 
 - `Vehicle`, `Customer`, `Booking` are rich entities — business rules live on the entity (`Vehicle.SoftDelete()`, `Booking.Cancel()`/`Complete()`/`Delete()` all self-validate and throw domain exceptions on an invalid transition).
-- `DateRange` is a value object encapsulating the `EndDate > StartDate` rule and pairwise overlap detection (`OverlapsWith`) — this is what `DateRangeOverlapTests` exercises directly, with no mocks.
+- `DateRange` is a value object encapsulating the `EndDate > StartDate` rule and pairwise overlap detection (`OverlapsWith`).
 - Checking whether a _new_ booking overlaps _other_ bookings requires querying the database, which a single entity can't do — that's `IBookingOverlapChecker`, a domain-defined interface implemented in Infrastructure and called from `CreateBookingCommandHandler` before constructing the `Booking`.
-- `BookingCreatedEvent` demonstrates the domain events pattern (bonus requirement): raised inside `Booking.Create`, collected and dispatched by `UnitOfWork.SaveChangesAsync` via a generic `DomainEventNotification<T>` wrapper (keeps `IDomainEvent` free of any MediatR dependency), handled by a logging handler in the Application layer.
+- `BookingCreatedEvent` demonstrates the domain events pattern: raised inside `Booking.Create`, collected and dispatched by `UnitOfWork.SaveChangesAsync` via a generic `DomainEventNotification<T>` wrapper, handled by a logging handler in the Application layer.
 
 **API highlights**
 
@@ -53,14 +53,10 @@ Each layer only depends on the layers "below" it (`Api → Application + Infrast
 
 **Design patterns in use**
 
-Beyond the required Repository/CQRS/MediatR/Unit of Work, a few classic patterns fall out of the design naturally rather than being bolted on:
-
 - **Factory Method** — `Vehicle.Create()`, `Customer.Create()`, `Booking.Create()` are the only way to construct these entities (private parameterless constructors for EF Core only). Each factory enforces its invariants at construction time, so an invalid entity can never exist.
 - **Observer** — `Booking.Create()` raises `BookingCreatedEvent`; `UnitOfWork.SaveChangesAsync` collects and publishes it via MediatR's `IPublisher`, and `BookingCreatedEventHandler` subscribes independently. The entity has no idea anything is listening.
 - **Value Object** — `DateRange` is immutable and equality-by-value, encapsulating the overlap/ordering rules so they can't be re-implemented (or gotten wrong) elsewhere.
-- **Pipeline/Decorator** — `ValidationBehavior<TRequest, TResponse>` wraps every command/query handler via MediatR's pipeline behaviors, running FluentValidation before the handler ever executes, without any handler needing to know validation happened.
-
-Deliberately not reached for: Strategy, Builder, Singleton, Adapter, etc. — the domain here is three entities and one real business rule, and forcing in more named patterns than the problem calls for would be over-engineering.
+- **Pipeline** — `ValidationBehavior<TRequest, TResponse>` wraps every command/query handler via MediatR's pipeline behaviors, running FluentValidation before the handler ever executes, without any handler needing to know validation happened.
 
 ### Frontend — feature-based React
 
@@ -82,7 +78,7 @@ frontend/src/
     └── utils/      # date/currency formatting
 ```
 
-**State management:** TanStack Query is the state layer for all server data — the domain here is entirely server-state (lists, filters resolved server-side, mutation results), so there's no Redux/Zustand. Query keys use a per-feature factory (`vehicleKeys.list(filters)`, etc.), mutations invalidate the relevant list/detail keys on success, and booking mutations additionally invalidate vehicle list keys since availability changes when a booking is created. Local UI-only state (which confirm dialog is open, toast queue) lives in small contexts.
+**State management:** TanStack Query is the state layer for all server data — the domain here is entirely server-state (lists, filters resolved server-side, mutation results). Query keys use a per-feature factory (`vehicleKeys.list(filters)`, etc.), mutations invalidate the relevant list/detail keys on success, and booking mutations additionally invalidate vehicle list keys since availability changes when a booking is created. Local UI-only state (which confirm dialog is open, toast queue) lives in small contexts.
 
 **DTO vs. model:** each feature has a `types/dto.ts` mirroring the API's JSON shape exactly and a `types/model.ts` with the app-facing shape (dates as `Date` instead of ISO strings); a `toXModel()` mapper runs inside each query's `select`, so components never see raw wire data.
 
@@ -90,7 +86,7 @@ frontend/src/
 
 ## Getting started
 
-Two ways to run this: fully containerized (fastest, nothing but Docker required), or natively on your machine (better for active development — hot reload on both sides).
+Two ways to run this: fully containerized (fastest, nothing but Docker required), or natively on your machine.
 
 ### Option A — Fully Dockerized
 
@@ -102,11 +98,11 @@ docker compose up -d --build
 
 This builds and runs all three services — SQL Server, the API, and the frontend — each from its own `Dockerfile` ([`backend/Dockerfile`](backend/Dockerfile), [`frontend/Dockerfile`](frontend/Dockerfile)):
 
-- **`sqlserver`** — unchanged, with a healthcheck the other services wait on.
-- **`api`** — multi-stage build (SDK image to publish, `aspnet` runtime image to run); the connection string and API key are supplied as environment variables in `docker-compose.yml` rather than `dotnet user-secrets` (which is a local-machine-only mechanism that doesn't exist inside a container) — same dev-only values used everywhere else in this README. Uploaded vehicle photos persist in a named volume (`vehicle-images`) across container recreates.
+- **`sqlserver`** — a healthcheck the other services wait on.
+- **`api`** — multi-stage build (SDK image to publish, `aspnet` runtime image to run); the connection string and API key are supplied as environment variables in `docker-compose.yml`
 - **`frontend`** — multi-stage build (Node to run `vite build`, then a minimal `nginx` image to serve the static output), with an `nginx.conf` that falls back to `index.html` for client-side routes so refreshing `/vehicles` doesn't 404.
 
-Migrations and seeding still happen automatically on the API container's first start, exactly as they do natively. Once it's up:
+Migrations and seeding still happen automatically on the API container's first start. Once it's up:
 
 - Frontend: `http://localhost:5173`
 - API / Swagger: `http://localhost:5080/swagger`
@@ -201,8 +197,6 @@ Every push and PR to `main` also runs this in CI — see [`.github/workflows/tes
 | `Application`                   |    **26%**    | The 4 required handlers (2 commands, 2 queries) are covered at 90–100%; the other CRUD handlers, validators, and DI wiring were out of scope for the assessment's stated minimum and are exercised manually via Swagger/Bruno instead of by a unit test.                                                     |
 | `Infrastructure`                |    **0%**     | Repository/EF Core code needs a real database to test meaningfully — mocking `DbContext` directly is famously awkward and tests little of value. This is intentionally an **integration-test gap**, not a unit-test gap: the honest fix is tests against a real (test-container) SQL Server, not more mocks. |
 | _(EF Core migrations excluded)_ |       —       | Auto-generated scaffolding, not hand-written logic — including them would dilute the number without saying anything real.                                                                                                                                                                                    |
-
-**Why not chase a higher number:** the required minimum was 2 commands, 2 queries, and 1 business-rule test — met exactly, and covered at 90–100% each. The 25% aggregate reflects an intentionally narrow, high-value test surface rather than broad shallow coverage across code that's better verified by an integration test or manual API exercise. See the [Assumptions](#assumptions) section and the project's interview notes for the fuller version of this trade-off.
 
 </details>
 
