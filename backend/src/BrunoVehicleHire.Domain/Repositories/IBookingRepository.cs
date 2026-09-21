@@ -7,6 +7,8 @@ public interface IBookingRepository
 {
     Task<Booking?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
+    Task<Booking?> GetByIdReadOnlyAsync(Guid id, CancellationToken ct = default);
+
     Task<bool> ExistsForCustomerAsync(Guid customerId, CancellationToken ct = default);
 
     Task<(IReadOnlyList<Booking> Items, int TotalCount)> GetPagedAsync(

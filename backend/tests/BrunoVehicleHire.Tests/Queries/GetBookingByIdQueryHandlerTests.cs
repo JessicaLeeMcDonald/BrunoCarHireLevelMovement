@@ -27,7 +27,7 @@ public class GetBookingByIdQueryHandlerTests
         var booking = Booking.Create(Guid.NewGuid(), Guid.NewGuid(), new DateRange(start, start.AddDays(2)), 900m);
 
         _bookingRepository
-            .Setup(r => r.GetByIdAsync(booking.Id, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByIdReadOnlyAsync(booking.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(booking);
 
         var result = await _handler.Handle(new GetBookingByIdQuery(booking.Id), CancellationToken.None);
@@ -42,7 +42,7 @@ public class GetBookingByIdQueryHandlerTests
     {
         var id = Guid.NewGuid();
         _bookingRepository
-            .Setup(r => r.GetByIdAsync(id, It.IsAny<CancellationToken>()))
+            .Setup(r => r.GetByIdReadOnlyAsync(id, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Booking?)null);
 
         var act = () => _handler.Handle(new GetBookingByIdQuery(id), CancellationToken.None);

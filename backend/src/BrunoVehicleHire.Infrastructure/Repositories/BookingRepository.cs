@@ -18,6 +18,9 @@ public sealed class BookingRepository : IBookingRepository
     public Task<Booking?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         _context.Bookings.FirstOrDefaultAsync(b => b.Id == id, ct);
 
+    public Task<Booking?> GetByIdReadOnlyAsync(Guid id, CancellationToken ct = default) =>
+        _context.Bookings.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id, ct);
+
     public Task<bool> ExistsForCustomerAsync(Guid customerId, CancellationToken ct = default) =>
         _context.Bookings.AnyAsync(b => b.CustomerId == customerId, ct);
 
@@ -25,7 +28,7 @@ public sealed class BookingRepository : IBookingRepository
         int pageNumber, int pageSize, Guid? vehicleId, Guid? customerId, BookingStatus? status,
         DateTime? from, DateTime? to, CancellationToken ct = default)
     {
-        var query = _context.Bookings.AsQueryable();
+        var query = _context.Bookings.AsNoTracking().AsQueryable();
 
         if (vehicleId.HasValue)
             query = query.Where(b => b.VehicleId == vehicleId.Value);

@@ -6,6 +6,8 @@ public interface ICustomerRepository
 {
     Task<Customer?> GetByIdAsync(Guid id, CancellationToken ct = default);
 
+    Task<Customer?> GetByIdReadOnlyAsync(Guid id, CancellationToken ct = default);
+
     Task<bool> EmailExistsAsync(string email, Guid? excludeId = null, CancellationToken ct = default);
 
     Task<(IReadOnlyList<Customer> Items, int TotalCount)> GetPagedAsync(

@@ -16,7 +16,7 @@ public sealed class GetVehicleByIdQueryHandler : IRequestHandler<GetVehicleByIdQ
 
     public async Task<VehicleDto> Handle(GetVehicleByIdQuery request, CancellationToken cancellationToken)
     {
-        var vehicle = await _unitOfWork.Vehicles.GetByIdAsync(request.Id, cancellationToken)
+        var vehicle = await _unitOfWork.Vehicles.GetByIdReadOnlyAsync(request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Domain.Entities.Vehicle), request.Id);
 
         return vehicle.ToDto();

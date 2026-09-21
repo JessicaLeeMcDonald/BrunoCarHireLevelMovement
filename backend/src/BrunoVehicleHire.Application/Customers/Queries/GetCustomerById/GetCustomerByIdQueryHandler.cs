@@ -16,7 +16,7 @@ public sealed class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByI
 
     public async Task<CustomerDto> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
     {
-        var customer = await _unitOfWork.Customers.GetByIdAsync(request.Id, cancellationToken)
+        var customer = await _unitOfWork.Customers.GetByIdReadOnlyAsync(request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Domain.Entities.Customer), request.Id);
 
         return customer.ToDto();

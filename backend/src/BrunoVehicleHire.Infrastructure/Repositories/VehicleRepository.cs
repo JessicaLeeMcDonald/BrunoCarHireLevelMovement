@@ -18,8 +18,11 @@ public sealed class VehicleRepository : IVehicleRepository
     public Task<Vehicle?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         _context.Vehicles.FirstOrDefaultAsync(v => v.Id == id, ct);
 
+    public Task<Vehicle?> GetByIdReadOnlyAsync(Guid id, CancellationToken ct = default) =>
+        _context.Vehicles.AsNoTracking().FirstOrDefaultAsync(v => v.Id == id, ct);
+
     public Task<Vehicle?> GetByIdIncludingDeletedAsync(Guid id, CancellationToken ct = default) =>
-        _context.Vehicles.IgnoreQueryFilters().FirstOrDefaultAsync(v => v.Id == id, ct);
+        _context.Vehicles.IgnoreQueryFilters().AsNoTracking().FirstOrDefaultAsync(v => v.Id == id, ct);
 
     public async Task<bool> RegistrationNumberExistsAsync(string registrationNumber, Guid? excludeId = null, CancellationToken ct = default)
     {
@@ -35,7 +38,9 @@ public sealed class VehicleRepository : IVehicleRepository
         int pageNumber, int pageSize, string? make, string? model, bool? availableOnly, bool includeDeleted = false,
         DateTime? availableFrom = null, DateTime? availableTo = null, CancellationToken ct = default)
     {
-        var query = includeDeleted ? _context.Vehicles.IgnoreQueryFilters().AsQueryable() : _context.Vehicles.AsQueryable();
+        var query = includeDeleted
+            ? _context.Vehicles.IgnoreQueryFilters().AsNoTracking().AsQueryable()
+            : _context.Vehicles.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(make))
             query = query.Where(v => v.Make.Contains(make));

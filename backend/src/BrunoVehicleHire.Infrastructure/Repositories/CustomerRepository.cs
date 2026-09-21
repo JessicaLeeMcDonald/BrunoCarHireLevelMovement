@@ -17,6 +17,9 @@ public sealed class CustomerRepository : ICustomerRepository
     public Task<Customer?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
         _context.Customers.FirstOrDefaultAsync(c => c.Id == id, ct);
 
+    public Task<Customer?> GetByIdReadOnlyAsync(Guid id, CancellationToken ct = default) =>
+        _context.Customers.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, ct);
+
     public async Task<bool> EmailExistsAsync(string email, Guid? excludeId = null, CancellationToken ct = default)
     {
         var normalizedEmail = email.Trim().ToLowerInvariant();
@@ -31,7 +34,7 @@ public sealed class CustomerRepository : ICustomerRepository
     public async Task<(IReadOnlyList<Customer> Items, int TotalCount)> GetPagedAsync(
         int pageNumber, int pageSize, string? search, CancellationToken ct = default)
     {
-        var query = _context.Customers.AsQueryable();
+        var query = _context.Customers.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
         {

@@ -16,7 +16,7 @@ public sealed class GetBookingByIdQueryHandler : IRequestHandler<GetBookingByIdQ
 
     public async Task<BookingDto> Handle(GetBookingByIdQuery request, CancellationToken cancellationToken)
     {
-        var booking = await _unitOfWork.Bookings.GetByIdAsync(request.Id, cancellationToken)
+        var booking = await _unitOfWork.Bookings.GetByIdReadOnlyAsync(request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(Domain.Entities.Booking), request.Id);
 
         return booking.ToDto();
