@@ -3,6 +3,7 @@ using BrunoVehicleHire.Domain.Entities;
 using BrunoVehicleHire.Domain.Repositories;
 using BrunoVehicleHire.Infrastructure.Persistence;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BrunoVehicleHire.Infrastructure.Repositories;
 
@@ -47,6 +48,28 @@ public sealed class UnitOfWork : IUnitOfWork
             var notification = (INotification)Activator.CreateInstance(notificationType, domainEvent)!;
             await _publisher.Publish(notification, ct);
         }
+
+        return result;
+    }
+
+    public async Task<TResult> ExecuteExclusiveAsync<TResult>(
+        string lockKey, Func<CancellationToken, Task<TResult>> action, CancellationToken ct = default)
+    {
+        await using var transaction = await _context.Database.BeginTransactionAsync(ct);
+
+        await _context.Database.ExecuteSqlInterpolatedAsync($@"
+            DECLARE @lockResult int;
+            EXEC @lockResult = sp_getapplock
+                @Resource = {lockKey},
+                @LockMode = 'Exclusive',
+                @LockOwner = 'Transaction',
+                @LockTimeout = 10000;
+            IF @lockResult < 0
+                THROW 50000, 'Could not acquire exclusive lock in time.', 1;", ct);
+
+        var result = await action(ct);
+
+        await transaction.CommitAsync(ct);
 
         return result;
     }

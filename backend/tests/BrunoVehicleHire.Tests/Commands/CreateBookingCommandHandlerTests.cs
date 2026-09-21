@@ -23,6 +23,12 @@ public class CreateBookingCommandHandlerTests
         _unitOfWork.Setup(u => u.Vehicles).Returns(_vehicleRepository.Object);
         _unitOfWork.Setup(u => u.Customers).Returns(_customerRepository.Object);
         _unitOfWork.Setup(u => u.Bookings).Returns(_bookingRepository.Object);
+        _unitOfWork
+            .Setup(u => u.ExecuteExclusiveAsync(
+                It.IsAny<string>(),
+                It.IsAny<Func<CancellationToken, Task<Booking>>>(),
+                It.IsAny<CancellationToken>()))
+            .Returns<string, Func<CancellationToken, Task<Booking>>, CancellationToken>((_, action, ct) => action(ct));
         _handler = new CreateBookingCommandHandler(_unitOfWork.Object, _overlapChecker.Object);
     }
 

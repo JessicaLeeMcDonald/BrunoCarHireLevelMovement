@@ -31,15 +31,23 @@ public sealed class CreateBookingCommandHandler : IRequestHandler<CreateBookingC
             ?? throw new NotFoundException(nameof(Customer), request.CustomerId);
 
         var period = new DateRange(request.StartDate, request.EndDate);
-
-        if (await _overlapChecker.HasOverlapAsync(vehicle.Id, period, ct: cancellationToken))
-            throw new OverlappingBookingException("This vehicle is already booked for an overlapping date range.");
-
         var totalPrice = vehicle.DailyRate * period.TotalDays;
-        var booking = Booking.Create(vehicle.Id, customer.Id, period, totalPrice);
 
-        _unitOfWork.Bookings.Add(booking);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        var booking = await _unitOfWork.ExecuteExclusiveAsync(
+            $"Booking:Vehicle:{vehicle.Id}",
+            async ct =>
+            {
+                if (await _overlapChecker.HasOverlapAsync(vehicle.Id, period, ct: ct))
+                    throw new OverlappingBookingException("This vehicle is already booked for an overlapping date range.");
+
+                var newBooking = Booking.Create(vehicle.Id, customer.Id, period, totalPrice);
+
+                _unitOfWork.Bookings.Add(newBooking);
+                await _unitOfWork.SaveChangesAsync(ct);
+
+                return newBooking;
+            },
+            cancellationToken);
 
         return booking.ToDto();
     }
